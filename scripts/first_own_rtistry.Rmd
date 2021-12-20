@@ -1,0 +1,86 @@
+---
+title: "First own artistry"
+author: "Sara"
+date: "11/12/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r import, warning=FALSE, message=FALSE}
+library(tidyverse)
+library(viridis)
+library(ggdark)
+```
+# get some random numbers
+```{r random}
+set.seed(1111)
+n_points <- 1000
+r1 <- sample(n_points) / (n_points * 2)
+r2 <- sample(n_points) / n_points 
+r3 <- sample(n_points) / (n_points * 0.5)
+my_tib <- tibble(r1, r2, r3)
+```
+
+1000 random number each, scaled so that each is twice as big (maximally) as the previous vector
+convert to long format
+```{r}
+my_tib <- my_tib %>%
+  pivot_longer(cols = everything(),
+               names_to = 'type',
+               values_to = 'value')
+```
+
+add another random number for color
+```{r}
+color_values<- sample(n_points/20)
+my_tib <- my_tib %>%
+  mutate(color_values = rep_len(color_values, nrow(my_tib)))
+```
+
+and another one for size with fewer values
+```{r}
+size_values <- sample(n_points/100)
+my_tib <- my_tib %>%
+  mutate(size_values = rep_len(size_values, nrow(my_tib)))
+```
+
+scatter plot
+```{r}
+my_tib %>%
+  ggplot(aes(x = value, y = type, color = color_values)) + 
+  geom_jitter() + 
+  scale_color_viridis(option = "mako") +
+  coord_polar() +
+  dark_theme_void() + 
+  theme(legend.position = "none")
+```
+
+could do
+
++ try and use different color palettes per type
++ try a different function: somewhat random ellipse
+
+```{r}
+x <- sin(1:1000)
+y <-tan(1:1000)
+z <- tan(1:1000 - 500)
+my_tib2 = tibble(x, y, z)
+my_tib2 <- my_tib2 %>%
+  mutate(color = rep_len(sample(20), nrow(my_tib2)))
+```
+
+```{r}
+my_tib2 %>%
+  ggplot(aes(x = x, y = y, color = x)) +
+  geom_point() + 
+  coord_polar() + 
+  scale_color_viridis(option = "mako") +
+  dark_theme_void() + 
+  theme(legend.position = "none")
+
+```
+
+repeat this with different phase of tan and different radius and different colors...?

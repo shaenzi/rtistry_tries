@@ -1,0 +1,145 @@
+---
+title: "Christmas cards"
+author: "Sara"
+date: "12/19/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(viridis)
+library(ggdark)
+```
+
+
+want to make Christmas cards! 
+
+
+```{r}
+a <- 0
+b <- 10
+theta <- seq(0,5*pi,0.07)
+r <- a + b*theta
+df <- tibble(x=r*cos(theta), y=r*sin(theta)) # Cartesian coords
+
+set.seed(1111)
+
+df <- df %>%
+  mutate(rand_w = sample(8, size = n(), replace = TRUE)) %>%
+  mutate(rand_alpha = sample(10, size = n(), replace = TRUE) / 10) %>%
+  mutate(rand_color = sample(12, size = n(), replace = TRUE))
+
+df <- df %>%
+  mutate(x_06 = 0.6 * x) %>%
+  mutate(y_06 = 0.6 * y) %>%
+  mutate(x_04 = 0.4 * x) %>%
+  mutate(y_04 = 0.4 * y) %>%
+  mutate(x_03 = 0.3 * x) %>%
+  mutate(y_03 = 0.3 * y) %>%
+  mutate(x_02 = 0.24 * x) %>%
+  mutate(y_02 = 0.24 * y)
+
+```
+
+
+```{r}
+base_plot <- df %>%
+  ggplot(mapping = aes(x = x,y = y)) + 
+  
+  # largest central spiral
+  geom_jitter(mapping = aes(size = rand_w, alpha = rand_alpha, 
+                            fill = factor(rand_color), color = factor(rand_color)),
+              shape = 16) + 
+  
+  # top right spiral
+  geom_point(mapping = aes(x=x_04 + 80, y = y_04 + 70,
+                           color = fct_rev(factor(rand_color)),
+                           alpha = rand_alpha,
+                           size = sample(rand_w)*0.4),
+             shape = 16) +
+  
+  # bottom left spiral
+  geom_point(mapping = aes(x=x_06-100, y=y_06-90,
+                           color = factor(sample(rand_color)),
+                           alpha = sample(rand_alpha),
+                           size = sample(rand_w)*0.6),
+             shape = 16) +
+  
+  # top left spiral
+  geom_point(mapping = aes(x=x_02-95, y=y_02+95,
+                           color = factor(sample(rand_color)),
+                           alpha = sample(rand_alpha),
+                           size = sample(rand_w)*0.2),
+             shape = 16) +
+  
+  # bottom right spiral
+  geom_point(mapping = aes(x=x_03+90, y=y_03-80,
+                           color = factor(sample(rand_color)),
+                           alpha = sample(rand_alpha),
+                           size = sample(rand_w)*0.3),
+             shape = 16) +
+  
+  coord_fixed()
+```
+
+
+```{r}
+base_plot +
+  scale_color_viridis_d(option = "viridis") +
+  #dark_theme_void() +
+  theme_void() +
+  theme(plot.background = element_rect(fill = 'gray85', color = "gray85")) +
+  theme(legend.position = "none")# remove legend
+```
+
+Now this is going to be option number 1 :-)
+
+want something with different colors
+```{r}
+base_plot +
+  scale_color_viridis(option = "mako", discrete = TRUE) +
+  #dark_theme_void() +
+  theme_void() +
+  theme(plot.background = element_rect(fill = 'gray75', color = "gray75")) +
+  theme(legend.position = "none")# remove legend 
+```
+
+
+and another color version, with palette from [here](http://tristen.ca/hcl-picker/#/hlc/12/1.05/E8C850/522C1A)
+
+```{r}
+my_colors1 <- c("#E7FC6E", "#C8EE6E", "#ABDF6E","#8FCF6E", "#76BF6E",
+               "#60AF6D", "#4B9E6A", "#398E67", "#297D61", "#1C6D5B",
+               "#125D52", "#0C4D49")
+my_colors2 <- c("#E3E962", "#C5DD61", "#A8D062", "#8EC263", "#75B463",
+                "#5FA663", "#4B9762", "#398860", "#29795D", "#1C6A57", 
+                "#125B51", "#0C4D49")
+my_colors3 <- c("#E8C850", "#DDB74A", "#D2A744", "#C6973F", "#B9883B", 
+                "#AB7936", "#9D6A32", "#8F5D2D", "#805029", "#714324",
+                "#61381F", "#522C1A")
+my_colors4 <- c("#D4D256", "#D4C64F", "#D2BA4A", "#D0AE46", "#CDA343",
+                "#C99740", "#C48C3F", "#BE823E", "#B7773D", "#B06D3C", 
+                "#A8643B", "#9F5B3B")
+```
+
+```{r}
+base_plot +
+  scale_color_manual(values = my_colors2) +
+  theme_void() +
+  theme(plot.background = element_rect(fill = 'oldlace', color = "oldlace")) +
+  theme(legend.position = "none")# remove legend 
+```
+
+```{r}
+base_plot +
+  scale_color_manual(values = my_colors4) +
+  theme_void() +
+  theme(plot.background = element_rect(fill = 'cyan4', color = "cyan4")) +
+  theme(legend.position = "none")# remove legend 
+
+```
+

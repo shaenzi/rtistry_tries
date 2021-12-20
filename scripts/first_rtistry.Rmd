@@ -1,0 +1,208 @@
+---
+title: "First rtistry"
+author: "Sara"
+date: "11/12/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Getting started with rtistry
+
+for now I am entirely copying from and following this [blogpost](https://ivelasq.rbind.io/blog/rtistry-intro/)
+```{r import, warning=FALSE, message=FALSE}
+library(tidyverse)
+library(viridis)
+library(ggdark)
+```
+
+# Parametric equations
+explained e.g. [here](https://lifethroughamathematicianseyes.wordpress.com/2014/11/13/parametric-equations/)
+
+simplest parametric equation: combine sine and cosine to make circle
+```{r}
+circleFun <- function(center = c(0, 0), diameter = 1, npoints = 100){
+    r = diameter / 2
+    tt <- seq(0,2*pi,length.out = npoints)
+    xx <- center[1] + r * cos(tt)
+    yy <- center[2] + r * sin(tt)
+    return(data.frame(x = xx, y = yy))
+}
+```
+
+plot a circle
+```{r}
+dat <- 
+  circleFun(c(1, -1), 2.3, npoints = 100)
+
+ggplot(dat,aes(x, y)) +
+  geom_path()
+```
+
+some parametric equation
+
+```{r}
+genFun <- function(center = c(0, 0), npoints = 500, c1 = 2.5, c2 = -5, c3 = 4.28, c4 = 2.3){
+t <- seq(0, 2*pi, length.out = npoints)
+xx <- center[1] + c1*(sin(c2*t)*sin(c2*t))*(2^cos(cos(c3*c4*t)))
+yy <- center[2] + c1*sin(sin(c2*t))*(cos(c3*c4*t)*cos(c3*c4*t))
+a <- data.frame(x = xx, y = yy)
+    
+return(a)
+}
+```
+
+with few points evaluated
+```{r}
+dat <- 
+  genFun(c(1,-1), npoints = 100)
+
+ggplot(dat, aes(x, y)) +
+  geom_path()
+```
+
+gets smoother with more points evaluated
+```{r}
+dat <- 
+  genFun(c(1,-1), npoints = 500, c1 = 5, c2 = -3, c3 = 5, c4 = 2)
+
+ggplot(dat, aes(x, y)) +
+  geom_path()
+```
+## varying geoms
+
+geom_line
+```{r}
+dat <- 
+  genFun(c(1,-1), npoints = 5000)
+
+ggplot(dat, aes(x, y)) +
+  geom_line()
+```
+
+geom_point
+```{r}
+set.seed(1234)
+
+dat <- 
+  genFun(c(1,-1), npoints = 500)
+
+dat %>% 
+  ggplot(aes(x, y)) +
+  geom_point()
+```
+## theme
+use theme_void
+
+## aesthetics
+
+### size
+```{r}
+set.seed(1111)
+
+dat <- 
+  genFun(c(1,-1), npoints = 5000) %>% 
+  mutate(rand_w = sample(n())/3000)
+
+dat %>% 
+  ggplot(aes(x, y)) +
+  geom_point(size = dat$rand_w) +
+  theme_void()
+```
+
+### shape
+```{r}
+dat %>% 
+  ggplot(aes(x, y)) +
+  geom_point(size = dat$rand_w,
+             shape = 8) +
+  theme_void()
+```
+
+### opacity
+```{r}
+set.seed(1234)
+
+dat <- 
+  dat %>% 
+  mutate(rand_o = sample(n())/5000)
+
+dat %>% 
+  ggplot(aes(x, y)) +
+  geom_point(size = dat$rand_w,
+             alpha = dat$rand_o) +
+  theme_void()
+```
+
+### color
+combined with dark theme void
+```{r}
+set.seed(1234)
+
+dat <- 
+  dat %>% 
+  mutate(rand_c = sample(n()))
+
+dat %>% 
+  ggplot(aes(x, y,  color = rand_c)) +
+  geom_point(aes(size = rand_w,
+             alpha = rand_o)) +
+  scale_color_viridis(option = "magma") +
+  coord_equal() +
+  dark_theme_void() +
+  theme(legend.position = "none")# remove legend
+```
+
+modify funcltion so that the random elements can be specified as parameters already
+```{r}
+genFun <- function(center = c(0, 0), npoints = 500, c1 = 2.5, c2 = -5, c3 = 4.28, c4 = 2.3, size_denom = 1, opacity_denom = 1, color_denom = 1){
+    t <- seq(0, 2*pi, length.out = npoints)
+    xx <- center[1] + c1*(sin(c2*t)*sin(c2*t))*(2^cos(cos(c3*c4*t)))
+    yy <- center[2] + c1*sin(sin(c2*t))*(cos(c3*c4*t)*cos(c3*c4*t))
+    rand_w <- sample(0:20, npoints, replace = TRUE)/size_denom
+    rand_o <- sample(1:100, npoints, replace = TRUE)/opacity_denom
+    rand_c <- sample(1:100, npoints, replace = TRUE)/color_denom
+    a <- data.frame(x = xx, y = yy, rand_w = rand_w, rand_o = rand_o, rand_c = rand_c)
+    
+    return(a)
+}
+```
+
+```{r}
+set.seed(1111)
+
+dat <- 
+  genFun(c(0, 0), npoints = 5000, c1 = 5, c2 = -3, c3 = 4, c4 = 2, size_denom = 3, opacity_denom = 50)
+
+dat %>% 
+  ggplot(aes(x, y,  color = rand_c)) +
+  geom_point(size = dat$rand_w,
+             alpha = dat$rand_o) +
+  scale_color_viridis(option = "mako") +
+  dark_theme_void() +
+  theme(legend.position = "none") # remove legend
+```
+
+```{r}
+dat %>% 
+  ggplot() +
+  geom_point(aes(x, y,  color = rand_c),
+             size = dat$rand_w,
+             alpha = dat$rand_o) +
+  geom_point(aes(-x, -y,  color = rand_c),
+             size = dat$rand_w,
+             alpha = dat$rand_o) +
+  geom_point(aes(-y, x,  color = rand_c),
+             size = dat$rand_w,
+             alpha = dat$rand_o) +
+  geom_point(aes(-y, -x,  color = rand_c),
+             size = dat$rand_w,
+             alpha = dat$rand_o) +
+  scale_color_viridis(option = "magma") +
+  dark_theme_void() +
+  theme(legend.position = "none") # remove legend
+```
+
+could also check [this](https://github.com/Ijeamakaanyene/patterns/blob/main/zine/zine_radial_patterns.pdf) for inspiration
