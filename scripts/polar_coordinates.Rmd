@@ -28,7 +28,7 @@ ggplot() +
   geom_point(mapping = aes(x = x + 400, y = y)) + 
   geom_point(mapping = aes(x = x + 500, y = y)) + 
   coord_polar() + 
-  theme
+  theme_void()
 ```
 
 ```{r}
@@ -137,8 +137,6 @@ df %>%
   theme_void() +
   theme(plot.background = element_rect(fill = 'gray85', color = "gray85")) +
   theme(legend.position = "none")# remove legend 
-
-
 ```
 
 
